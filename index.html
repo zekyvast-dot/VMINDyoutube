@@ -1226,6 +1226,7 @@ body {
 const gamesData = [
     {
         id: 1,
+        videoNumber: 1,
         title: "Lamar : vlogger santai game",
         description: "Game live vlogger yang dimain kan dengan cara klik trus menerus.",
         rating: 5,
@@ -1233,6 +1234,7 @@ const gamesData = [
     },
     {
         id: 2,
+        videoNumber: 2,
         title: "Em3 simulator pro mod apk",
         description: "Game Menjadi presiden dengan cheat mod apk.",
         rating: 5,
@@ -1280,7 +1282,7 @@ function renderGames(games) {
         <div class="game-card" data-id="${game.id}">
             <div class="game-header">
                 <h3 class="game-title">
-                    <span class="game-prefix">Video 1 - </span>${game.title}
+                    <span class="game-prefix">Video ${game.videoNumber} - </span>${game.title}
                 </h3>
             </div>
             <p class="game-desc">${game.description} - Dari Video YouTube Vmind</p>
