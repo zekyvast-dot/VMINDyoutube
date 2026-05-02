@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0B0B0F" />
+  <title>KOMIKZ — Premium Comic Reader</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+  <!-- ==================== APP SHELL ==================== -->
+  
+  <!-- Loading Screen -->
+  <div id="app-loader" class="app-loader">
+    <div class="loader-content">
+      <div class="loader-logo">K</div>
+      <div class="loader-text">KOMIKZ</div>
+      <div class="loader-bar">
+        <div class="loader-progress"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="main-nav" class="main-nav">
+    <div class="nav-container">
+      <a href="#/" class="nav-logo" data-route="/">
+        <span class="logo-mark">K</span>
+        <span class="logo-text">KOMIKZ</span>
+      </a>
+      
+      <div class="nav-search">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="nav-search-input" placeholder="Search comics, genres..." autocomplete="off" />
+        <button class="search-clear" id="search-clear-btn"><i class="fas fa-times"></i></button>
+      </div>
+      
+      <div class="nav-actions">
+        <button class="nav-btn" id="search-toggle-btn" aria-label="Search">
+          <i class="fas fa-search"></i>
+        </button>
+        <button class="nav-btn" id="bookmark-toggle-btn" aria-label="Bookmarks">
+          <i class="fas fa-bookmark"></i>
+          <span class="nav-badge" id="bookmark-count">0</span>
+        </button>
+        <button class="nav-btn" id="history-toggle-btn" aria-label="History">
+          <i class="fas fa-clock-rotate-left"></i>
+        </button>
+        <div class="nav-user" id="nav-user">
+          <button class="user-avatar-btn" id="login-btn">
+            <i class="fas fa-user"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-nav" id="mobile-nav">
+    <a href="#/" class="mobile-nav-item active" data-route="/">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#/search" class="mobile-nav-item" data-route="/search">
+      <i class="fas fa-search"></i>
+      <span>Explore</span>
+    </a>
+    <a href="#/library" class="mobile-nav-item" data-route="/library">
+      <i class="fas fa-bookmark"></i>
+      <span>Library</span>
+    </a>
+    <button class="mobile-nav-item" id="mobile-user-btn">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT AREA ==================== -->
+  <main id="app-main" class="app-main">
+    
+    <!-- ===== HOME VIEW ===== -->
+    <section id="view-home" class="view view-home">
+      <!-- Hero -->
+      <div class="hero-section" id="hero-section">
+        <div class="hero-backdrop" id="hero-backdrop"></div>
+        <div class="hero-gradient"></div>
+        <div class="hero-content">
+          <span class="hero-badge">Trending Now</span>
+          <h1 class="hero-title" id="hero-title">Loading...</h1>
+          <p class="hero-desc" id="hero-desc">Discover the best comics</p>
+          <div class="hero-meta" id="hero-meta"></div>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-glow" id="hero-read-btn">
+              <i class="fas fa-play"></i> Start Reading
+            </button>
+            <button class="btn btn-ghost" id="hero-bookmark-btn">
+              <i class="fas fa-bookmark"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Type Tabs -->
+      <div class="type-tabs" id="type-tabs">
+        <button class="type-tab active" data-type="all">All</button>
+        <button class="type-tab" data-type="manga">Manga</button>
+        <button class="type-tab" data-type="manhwa">Manhwa</button>
+        <button class="type-tab" data-type="manhua">Manhua</button>
+      </div>
+
+      <!-- Continue Reading -->
+      <div class="section continue-section" id="continue-section" style="display:none;">
+        <div class="section-header">
+          <h2 class="section-title">Continue Reading</h2>
+          <a href="#/library" class="section-link">See All</a>
+        </div>
+        <div class="continue-grid" id="continue-grid"></div>
+      </div>
+
+      <!-- Trending -->
+      <div class="section trending-section">
+        <div class="section-header">
+          <h2 class="section-title">Trending This Week</h2>
+          <div class="section-actions">
+            <button class="scroll-btn prev" data-target="trending-scroll"><i class="fas fa-chevron-left"></i></button>
+            <button class="scroll-btn next" data-target="trending-scroll"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="horizontal-scroll" id="trending-scroll"></div>
+      </div>
+
+      <!-- Latest Updates -->
+      <div class="section latest-section">
+        <div class="section-header">
+          <h2 class="section-title">Latest Updates</h2>
+          <a href="#/search?sort=latest" class="section-link">View All</a>
+        </div>
+        <div class="comic-grid" id="latest-grid"></div>
+      </div>
+
+      <!-- Recommended -->
+      <div class="section recommended-section">
+        <div class="section-header">
+          <h2 class="section-title">Recommended For You</h2>
+        </div>
+        <div class="comic-grid" id="recommended-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== SEARCH VIEW ===== -->
+    <section id="view-search" class="view view-search hidden">
+      <div class="search-header">
+        <div class="search-box-large">
+          <i class="fas fa-search"></i>
+          <input type="text" id="search-input" placeholder="Search titles, authors, genres..." autocomplete="off" />
+          <button class="search-filter-btn" id="search-filter-btn">
+            <i class="fas fa-sliders"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Panel -->
+      <div class="filter-panel" id="filter-panel">
+        <div class="filter-group">
+          <label>Genre</label>
+          <div class="filter-tags" id="genre-filters">
+            <button class="filter-tag" data-filter="genre" data-value="action">Action</button>
+            <button class="filter-tag" data-filter="genre" data-value="adventure">Adventure</button>
+            <button class="filter-tag" data-filter="genre" data-value="comedy">Comedy</button>
+            <button class="filter-tag" data-filter="genre" data-value="drama">Drama</button>
+            <button class="filter-tag" data-filter="genre" data-value="fantasy">Fantasy</button>
+            <button class="filter-tag" data-filter="genre" data-value="horror">Horror</button>
+            <button class="filter-tag" data-filter="genre" data-value="isekai">Isekai</button>
+            <button class="filter-tag" data-filter="genre" data-value="romance">Romance</button>
+            <button class="filter-tag" data-filter="genre" data-value="sci-fi">Sci-Fi</button>
+            <button class="filter-tag" data-filter="genre" data-value="slice-of-life">Slice of Life</button>
+            <button class="filter-tag" data-filter="genre" data-value="sports">Sports</button>
+            <button class="filter-tag" data-filter="genre" data-value="supernatural">Supernatural</button>
+          </div>
+        </div>
+        <div class="filter-row">
+          <div class="filter-group">
+            <label>Type</label>
+            <select id="type-filter">
+              <option value="">All Types</option>
+              <option value="manga">Manga</option>
+              <option value="manhwa">Manhwa</option>
+              <option value="manhua">Manhua</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status</label>
+            <select id="status-filter">
+              <option value="">All Status</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+              <option value="hiatus">Hiatus</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Sort By</label>
+            <select id="sort-filter">
+              <option value="popular">Most Popular</option>
+              <option value="latest">Latest Update</option>
+              <option value="rating">Highest Rated</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Suggestions -->
+      <div class="suggestions-panel" id="suggestions-panel" style="display:none;">
+        <h3>Trending Searches</h3>
+        <div class="suggestion-tags" id="suggestion-tags"></div>
+      </div>
+
+      <!-- Search Results -->
+      <div class="search-results" id="search-results">
+        <div class="results-header">
+          <span class="results-count" id="results-count"></span>
+          <div class="results-view-toggle">
+            <button class="view-btn active" data-view="grid"><i class="fas fa-grid-2"></i></button>
+            <button class="view-btn" data-view="list"><i class="fas fa-list"></i></button>
+          </div>
+        </div>
+        <div class="comic-grid" id="search-results-grid"></div>
+        <div class="search-empty" id="search-empty" style="display:none;">
+          <i class="fas fa-search"></i>
+          <h3>No results found</h3>
+          <p>Try different keywords or filters</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DETAIL VIEW ===== -->
+    <section id="view-detail" class="view view-detail hidden">
+      <!-- Cinematic Header -->
+      <div class="detail-hero" id="detail-hero">
+        <div class="detail-backdrop" id="detail-backdrop"></div>
+        <div class="detail-hero-gradient"></div>
+        <button class="detail-back-btn" id="detail-back-btn">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="detail-hero-content">
+          <div class="detail-poster">
+            <img id="detail-cover" src="" alt="" loading="lazy" />
+            <div class="detail-poster-glow"></div>
+          </div>
+          <div class="detail-info">
+            <div class="detail-badges" id="detail-badges"></div>
+            <h1 class="detail-title" id="detail-title"></h1>
+            <div class="detail-meta" id="detail-meta"></div>
+            <div class="detail-rating" id="detail-rating"></div>
+            <div class="detail-actions">
+              <button class="btn btn-primary btn-glow btn-large" id="detail-read-btn">
+                <i class="fas fa-play"></i> <span id="detail-read-text">Start Reading</span>
+              </button>
+              <button class="btn btn-ghost btn-large" id="detail-bookmark-btn">
+                <i class="fas fa-bookmark"></i> <span>Bookmark</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Content -->
+      <div class="detail-body">
+        <div class="detail-tabs">
+          <button class="detail-tab active" data-tab="overview">Overview</button>
+          <button class="detail-tab" data-tab="chapters">Chapters</button>
+          <button class="detail-tab" data-tab="related">Related</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="detail-tab-content active" id="tab-overview">
+          <div class="detail-description" id="detail-description"></div>
+          <div class="detail-tags" id="detail-tags"></div>
+          <div class="detail-stats" id="detail-stats"></div>
+        </div>
+
+        <!-- Chapters Tab -->
+        <div class="detail-tab-content" id="tab-chapters">
+          <div class="chapters-header">
+            <div class="chapters-sort">
+              <button class="sort-btn active" data-sort="desc">
+                <i class="fas fa-arrow-down-9-1"></i> Newest
+              </button>
+              <button class="sort-btn" data-sort="asc">
+                <i class="fas fa-arrow-up-1-9"></i> Oldest
+              </button>
+            </div>
+            <span class="chapters-count" id="chapters-count"></span>
+          </div>
+          <div class="chapters-list" id="chapters-list"></div>
+        </div>
+
+        <!-- Related Tab -->
+        <div class="detail-tab-content" id="tab-related">
+          <div class="comic-grid" id="related-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== READER VIEW ===== -->
+    <section id="view-reader" class="view view-reader hidden">
+      <!-- Reader Toolbar -->
+      <div class="reader-toolbar" id="reader-toolbar">
+        <div class="reader-toolbar-left">
+          <button class="reader-btn" id="reader-back-btn">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="reader-title-group">
+            <span class="reader-comic-title" id="reader-comic-title"></span>
+            <span class="reader-chapter-title" id="reader-chapter-title"></span>
+          </div>
+        </div>
+        <div class="reader-toolbar-right">
+          <button class="reader-btn" id="reader-settings-btn" title="Settings">
+            <i class="fas fa-gear"></i>
+          </button>
+          <button class="reader-btn" id="reader-bookmark-btn" title="Bookmark">
+            <i class="fas fa-bookmark"></i>
+          </button>
+          <button class="reader-btn" id="reader-comments-btn" title="Comments">
+            <i class="fas fa-comment"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Reader Progress -->
+      <div class="reader-progress-bar" id="reader-progress-bar">
+        <div class="reader-progress-fill" id="reader-progress-fill"></div>
+      </div>
+
+      <!-- Reader Content -->
+      <div class="reader-container" id="reader-container">
+        <!-- Vertical Scroll Mode -->
+        <div class="reader-pages" id="reader-pages"></div>
+        
+        <!-- Manga Mode (RTL) -->
+        <div class="reader-manga-mode hidden" id="reader-manga-mode">
+          <div class="manga-pages" id="manga-pages"></div>
+        </div>
+      </div>
+
+      <!-- Reader Navigation Overlay -->
+      <div class="reader-nav-overlay" id="reader-nav-overlay">
+        <div class="reader-nav-zones">
+          <div class="reader-zone reader-zone-prev" id="reader-zone-prev"></div>
+          <div class="reader-zone reader-zone-menu" id="reader-zone-menu"></div>
+          <div class="reader-zone reader-zone-next" id="reader-zone-next"></div>
+        </div>
+      </div>
+
+      <!-- Reader Settings Panel -->
+      <div class="reader-settings" id="reader-settings">
+        <div class="settings-panel">
+          <h3>Reader Settings</h3>
+          <div class="setting-item">
+            <label>Reading Direction</label>
+            <div class="setting-options">
+              <button class="setting-option active" data-setting="direction" data-value="vertical">
+                <i class="fas fa-arrows-up-down"></i> Vertical
+              </button>
+              <button class="setting-option" data-setting="direction" data-value="manga">
+                <i class="fas fa-arrows-left-right"></i> Manga (RTL)
+              </button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Image Fit</label>
+            <div class="setting-options">
+              <button class="setting-option active" data-setting="fit" data-value="width">Fit Width</button>
+              <button class="setting-option" data-setting="fit" data-value="height">Fit Height</button>
+              <button class="setting-option" data-setting="fit" data-value="original">Original</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Background</label>
+            <div class="setting-options">
+              <button class="setting-option active" data-setting="bg" data-value="dark">Dark</button>
+              <button class="setting-option" data-setting="bg" data-value="black">Black</button>
+              <button class="setting-option" data-setting="bg" data-value="light">Light</button>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label>Brightness</label>
+            <input type="range" class="setting-slider" id="brightness-slider" min="50" max="150" value="100" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter Navigation Footer -->
+      <div class="reader-footer" id="reader-footer">
+        <button class="reader-nav-btn" id="reader-prev-chapter" disabled>
+          <i class="fas fa-chevron-left"></i> Prev
+        </button>
+        <div class="reader-chapter-select">
+          <select id="reader-chapter-select"></select>
+        </div>
+        <button class="reader-nav-btn" id="reader-next-chapter">
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Interstitial Ad Overlay -->
+      <div class="ad-overlay" id="ad-overlay">
+        <div class="ad-container">
+          <div class="ad-label">Advertisement</div>
+          <div class="ad-content" id="ad-content">
+            <div class="ad-placeholder">
+              <i class="fas fa-ad"></i>
+              <span>Loading Ad...</span>
+            </div>
+          </div>
+          <button class="ad-skip-btn" id="ad-skip-btn">
+            Skip in <span id="ad-countdown">5</span>s
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== LIBRARY VIEW ===== -->
+    <section id="view-library" class="view view-library hidden">
+      <div class="library-header">
+        <h1>My Library</h1>
+        <div class="library-tabs">
+          <button class="lib-tab active" data-lib="bookmarks">Bookmarks</button>
+          <button class="lib-tab" data-lib="history">History</button>
+        </div>
+      </div>
+      <div class="library-content" id="library-content"></div>
+      <div class="library-empty" id="library-empty">
+        <i class="fas fa-book-open"></i>
+        <h3>Your library is empty</h3>
+        <p>Start reading to see your comics here</p>
+        <a href="#/" class="btn btn-primary">Browse Comics</a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS & OVERLAYS ==================== -->
+  
+  <!-- Auth Modal -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal modal-auth">
+      <button class="modal-close" id="auth-close"><i class="fas fa-times"></i></button>
+      <div class="auth-content">
+        <div class="auth-logo">K</div>
+        <h2>Welcome to KOMIKZ</h2>
+        <p>Sign in to sync your library across devices</p>
+        <button class="btn btn-google" id="google-signin-btn">
+          <img src="https://www.google.com/favicon.ico" alt="G" />
+          Continue with Google
+        </button>
+        <p class="auth-note">By signing in, you agree to our Terms of Service</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Menu Dropdown -->
+  <div class="dropdown-menu" id="user-dropdown">
+    <div class="dropdown-header">
+      <img id="user-avatar" src="" alt="" />
+      <div class="dropdown-user-info">
+        <span id="user-name">Guest</span>
+        <span id="user-email">Not signed in</span>
+      </div>
+    </div>
+    <div class="dropdown-divider"></div>
+    <a href="#/library" class="dropdown-item"><i class="fas fa-bookmark"></i> My Library</a>
+    <a href="#/library?tab=history" class="dropdown-item"><i class="fas fa-clock-rotate-left"></i> Reading History</a>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item" id="signout-btn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script src="app.js"></script>
+</body>
+</html>
